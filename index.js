@@ -5,6 +5,7 @@ const mappingsFile = process.argv[2]
 const inputFile = process.argv[3]
 const outputFile = process.argv[4]
 
+// process tinyv2 mappings and create a maps for mapped classes, fields, and methods
 async function processMappings(mappingsStream) {
   const rl = readline.createInterface({
     input: mappingsStream,
@@ -40,7 +41,7 @@ async function processMappings(mappingsStream) {
 }
 
 function remapDescriptor(descriptor, mappedClasses) {
-  const objDescriptorRegex = /L[\w/$]+;/g
+  const objDescriptorRegex = /L[\w/$]+;/g // match object descriptors, for example: Lnet/minecraft/client/main/Minecraft;
   const objDescriptors = descriptor.match(objDescriptorRegex)
   if (!objDescriptors) return descriptor
   for (const objDescriptor of objDescriptors) {
@@ -51,12 +52,16 @@ function remapDescriptor(descriptor, mappedClasses) {
   return descriptor
 }
 
+// remap intermediary to named for every line
 function remapLine(line, mappedClasses, mappedFields, mappedMethods) {
-  const [ _access, fType ] = line.split('\t')
-  switch (fType) {
+  switch (line.split('\t')[1]) { // get the mapping type
     case 'class':
       var [ access, type, intermediary ] = line.split('\t')
-      line = [ access, type, mappedClasses[intermediary] ].join('\t')
+      line = [
+        access,
+        type,
+        mappedClasses[intermediary]
+      ].join('\t')
       break
     case 'method':
       var [ access, type, intermediaryClass, intermediary, descriptor ] = line.split('\t')
