@@ -46,7 +46,7 @@ function remapDescriptor(descriptor, mappedClasses) {
   if (!objDescriptors) return descriptor
   for (const objDescriptor of objDescriptors) {
     const object = objDescriptor.substring(1, objDescriptor.length - 1) // remove "L" and ";"
-    if (!object.startsWith('net/minecraft')) return descriptor
+    if (!object.startsWith('net/minecraft') && !object.startsWith('com/mojang')) return descriptor
     descriptor = descriptor.replace(objDescriptor, `L${mappedClasses[object]};`)
   }
   return descriptor
@@ -57,30 +57,37 @@ function remapLine(line, mappedClasses, mappedFields, mappedMethods) {
   switch (line.split('\t')[1]) { // get the mapping type
     case 'class':
       var [ access, type, intermediary ] = line.split('\t')
+      var mappedClass = mappedClasses[intermediary] != null ?  mappedClasses[intermediary] : intermediary
       line = [
         access,
         type,
-        mappedClasses[intermediary]
+        mappedClass
       ].join('\t')
       break
     case 'method':
       var [ access, type, intermediaryClass, intermediary, descriptor ] = line.split('\t')
+      var mappedClass = mappedClasses[intermediaryClass] != null ?  mappedClasses[intermediaryClass] : intermediaryClass
+      var mappedMethod = mappedMethods[intermediary] != null ?  mappedMethods[intermediary] : intermediary
+      var remappedDescriptor = remapDescriptor(descriptor, mappedClasses)
       line = [
         access,
         type,
-        mappedClasses[intermediaryClass],
-        mappedMethods[intermediary],
-        remapDescriptor(descriptor, mappedClasses)
+        mappedClass,
+        mappedMethod,
+        remappedDescriptor
       ].join('\t')
       break
     case 'field':
       var [ access, type, intermediaryClass, intermediary, descriptor ] = line.split('\t')
+      var mappedClass = mappedClasses[intermediaryClass] != null ?  mappedClasses[intermediaryClass] : intermediaryClass
+      var mappedField = mappedFields[intermediary] != null ?  mappedFields[intermediary] : intermediary
+      var remappedDescriptor = remapDescriptor(descriptor, mappedClasses)
       line = [
         access,
         type,
-        mappedClasses[intermediaryClass],
-        mappedFields[intermediary],
-        remapDescriptor(descriptor, mappedClasses)
+        mappedClass,
+        mappedField,
+        remappedDescriptor
       ].join('\t')
       break
   }
