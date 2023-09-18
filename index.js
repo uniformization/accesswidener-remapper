@@ -57,41 +57,27 @@ function remapLine(line, mappedClasses, mappedFields, mappedMethods) {
   switch (line.split('\t')[1]) { // get the mapping type
     case 'class':
       var [ access, type, intermediary ] = line.split('\t')
-      var mappedClass = mappedClasses[intermediary] != null ?  mappedClasses[intermediary] : intermediary
-      line = [
-        access,
-        type,
-        mappedClass
-      ].join('\t')
-      break
+
+      var mappedClass = mappedClasses[intermediary] ?? intermediary
+
+      return [ access, type, mappedClass ].join('\t')
     case 'method':
       var [ access, type, intermediaryClass, intermediary, descriptor ] = line.split('\t')
-      var mappedClass = mappedClasses[intermediaryClass] != null ?  mappedClasses[intermediaryClass] : intermediaryClass
-      var mappedMethod = mappedMethods[intermediary] != null ?  mappedMethods[intermediary] : intermediary
+
+      var mappedClass = mappedClasses[intermediaryClass] ?? intermediaryClass
+      var mappedMethod = mappedMethods[intermediary] ?? intermediary
       var remappedDescriptor = remapDescriptor(descriptor, mappedClasses)
-      line = [
-        access,
-        type,
-        mappedClass,
-        mappedMethod,
-        remappedDescriptor
-      ].join('\t')
-      break
+
+      return [ access, type, mappedClass, mappedMethod, remappedDescriptor ].join('\t')
     case 'field':
       var [ access, type, intermediaryClass, intermediary, descriptor ] = line.split('\t')
-      var mappedClass = mappedClasses[intermediaryClass] != null ?  mappedClasses[intermediaryClass] : intermediaryClass
-      var mappedField = mappedFields[intermediary] != null ?  mappedFields[intermediary] : intermediary
+
+      var mappedClass = mappedClasses[intermediaryClass] ?? intermediaryClass
+      var mappedField = mappedFields[intermediary] ?? intermediary
       var remappedDescriptor = remapDescriptor(descriptor, mappedClasses)
-      line = [
-        access,
-        type,
-        mappedClass,
-        mappedField,
-        remappedDescriptor
-      ].join('\t')
-      break
+
+      return [ access, type, mappedClass, mappedField, remappedDescriptor ].join('\t')
   }
-  return line
 }
 
 async function main() {
